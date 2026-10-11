@@ -11,6 +11,15 @@ class TenantCreateRequest(BaseModel):
     admin_email: Optional[str] = None
     admin_name: Optional[str] = None
 
+class TenantUpdateRequest(BaseModel):
+    name: Optional[str] = None
+    slug: Optional[str] = None
+    logo_url: Optional[str] = None
+    primary_color: Optional[str] = None
+    secondary_color: Optional[str] = None
+    bg_color: Optional[str] = None
+    is_active: Optional[bool] = None
+
 class TenantResponse(BaseModel):
     id: str
     name: str

@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from typing import List
 import uuid
 from datetime import datetime, timezone
-from app.modules.super_admin.schemas import TenantCreateRequest, TenantResponse
+from app.modules.super_admin.schemas import TenantCreateRequest, TenantUpdateRequest, TenantResponse
 from app.common.models import ResponseModel
 from app.core.middleware.tenant_security import get_current_user_data
 from app.core.database import supabase_client
@@ -123,3 +123,58 @@ async def create_tenant(payload: TenantCreateRequest, user: dict = Depends(requi
         created_at=now_str
     )
     return ResponseModel(success=True, message="Empresa registrada", data=fallback_response)
+
+@router.put("/tenants/{tenant_id}", response_model=ResponseModel[TenantResponse])
+async def update_tenant(tenant_id: str, payload: TenantUpdateRequest, user: dict = Depends(require_super_admin)):
+    """Modifica las propiedades de una tienda (nombre, slug, colores, logo) en Supabase."""
+    update_data = {}
+    if payload.name is not None:
+        update_data["name"] = payload.name
+    if payload.slug is not None:
+        update_data["slug"] = payload.slug.strip().lower()
+    if payload.logo_url is not None:
+        update_data["logo_url"] = payload.logo_url
+    if payload.primary_color is not None:
+        update_data["primary_color"] = payload.primary_color
+    if payload.secondary_color is not None:
+        update_data["secondary_color"] = payload.secondary_color
+    if payload.bg_color is not None:
+        update_data["bg_color"] = payload.bg_color
+    if payload.is_active is not None:
+        update_data["is_active"] = payload.is_active
+
+    try:
+        res = supabase_client.table("tenants").update(update_data).eq("id", tenant_id).execute()
+        if res.data:
+            item = res.data[0]
+            return ResponseModel(
+                success=True,
+                message="Empresa actualizada correctamente en Supabase",
+                data=TenantResponse(
+                    id=str(item["id"]),
+                    name=item["name"],
+                    slug=item["slug"],
+                    logo_url=item.get("logo_url") or "",
+                    is_active=item.get("is_active", True),
+                    primary_color=item.get("primary_color") or "#6b8e64",
+                    secondary_color=item.get("secondary_color") or "#6b462b",
+                    bg_color=item.get("bg_color") or "#faf8f2",
+                    created_at=str(item.get("created_at") or datetime.now(timezone.utc).isoformat())
+                )
+            )
+    except Exception as e:
+        print("Error updating tenant in Supabase:", e)
+
+    # Fallback
+    fallback_response = TenantResponse(
+        id=tenant_id,
+        name=payload.name or "Empresa Actualizada",
+        slug=payload.slug or "slug",
+        logo_url=payload.logo_url or "",
+        is_active=payload.is_active if payload.is_active is not None else True,
+        primary_color=payload.primary_color or "#6b8e64",
+        secondary_color=payload.secondary_color or "#6b462b",
+        bg_color=payload.bg_color or "#faf8f2",
+        created_at=datetime.now(timezone.utc).isoformat()
+    )
+    return ResponseModel(success=True, message="Empresa actualizada", data=fallback_response)

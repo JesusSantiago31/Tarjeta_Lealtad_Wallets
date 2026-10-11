@@ -61,9 +61,9 @@ async def login(payload: LoginRequest):
             "tenant_id": None,
             "tenant_slug": None,
             "tenant_name": "Global Platform",
-            "primary_color": "#3b82f6",
-            "secondary_color": "#f59e0b",
-            "bg_color": "#0f172a"
+            "primary_color": "#0066fe",
+            "secondary_color": "#004bbb",
+            "bg_color": "#edf5fc"
         }
     }
 
@@ -105,10 +105,10 @@ async def login(payload: LoginRequest):
     access_token = create_access_token(token_data)
 
     theme_data = {
-        "primary_color": user.get("primary_color", "#4f46e5"),
-        "secondary_color": user.get("secondary_color", "#06b6d4"),
-        "bg_color": user.get("bg_color", "#0f172a"),
-        "text_color": "#f8fafc",
+        "primary_color": user.get("primary_color", "#0066fe"),
+        "secondary_color": user.get("secondary_color", "#004bbb"),
+        "bg_color": user.get("bg_color", "#edf5fc"),
+        "text_color": user.get("text_color", "#0f172a"),
         "logo_url": ""
     }
 
