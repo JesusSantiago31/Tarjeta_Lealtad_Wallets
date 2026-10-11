@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigate, Outlet } from 'react_router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../auth/useAuth';
 
 export const ProtectedRoute = ({ allowedRoles = [] }) => {
