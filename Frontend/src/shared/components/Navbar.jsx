@@ -25,26 +25,32 @@ export const Navbar = () => {
         {/* Brand & Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <div style={{
-            width: '42px',
-            height: '42px',
-            borderRadius: 'var(--radius-md)',
-            backgroundColor: 'var(--primary-color)',
+            width: '44px',
+            height: '44px',
+            borderRadius: '12px',
+            backgroundColor: 'var(--primary-color, #6b8e64)',
             color: '#ffffff',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             fontWeight: '800',
-            fontSize: '1.25rem',
+            fontSize: '1.35rem',
             boxShadow: '0 2px 8px rgba(0,0,0,0.12)'
           }}>
-            {user.role === 'super_admin' ? '🌐' : (user.tenant_name ? user.tenant_name.charAt(0) : '☕')}
+            {user.role === 'super_admin' ? '🌐' : '☕'}
           </div>
           <div>
-            <h2 style={{ fontSize: '1.05rem', fontWeight: '800', lineHeight: 1.1 }}>
+            <h2 style={{ fontSize: '1.15rem', fontWeight: '800', lineHeight: 1.1, color: 'var(--secondary-color, #4a3525)' }}>
               {user.role === 'super_admin' ? 'SaaS Super Admin' : (user.tenant_name || 'Café Lealtad')}
             </h2>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.2rem' }}>
-              <Badge variant={user.role === 'super_admin' ? 'warning' : 'primary'}>{user.role.toUpperCase()}</Badge>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.15rem' }}>
+              {user.role === 'cashier' ? (
+                <span style={{ fontSize: '0.72rem', fontWeight: '800', color: 'var(--secondary-color, #6b462b)', letterSpacing: '0.04em' }}>
+                  SISTEMA DE MONEDERO
+                </span>
+              ) : (
+                <Badge variant={user.role === 'super_admin' ? 'warning' : 'primary'}>{user.role.toUpperCase()}</Badge>
+              )}
             </div>
           </div>
         </div>
