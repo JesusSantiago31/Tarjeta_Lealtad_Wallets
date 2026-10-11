@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../../core/auth/useAuth';
 import { Card } from '../../shared/components/Card';
 import { Button } from '../../shared/components/Button';
-import { Navigation, Mail, Lock, Building, Shield, Store, CreditCard, User, AlertCircle } from 'lucide-react';
+import { Navigation, Mail, Lock, Building, Shield, Store, CreditCard, User, AlertCircle, UserPlus } from 'lucide-react';
 
 export const LoginView = () => {
   const { login, loading } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const initialTenant = searchParams.get('tenant') || searchParams.get('origin') || 'demo-cafe';
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [tenantSlug, setTenantSlug] = useState('demo-cafe');
+  const [tenantSlug, setTenantSlug] = useState(initialTenant);
   const [errorMsg, setErrorMsg] = useState('');
 
   const handleLogin = async (e) => {
@@ -116,18 +119,18 @@ export const LoginView = () => {
               </div>
             </div>
 
-            {/* Campo Correo Electrónico */}
+            {/* Campo Correo o Teléfono */}
             <div style={{ marginBottom: '1.1rem' }}>
-              <label className="form-label">CORREO ELECTRÓNICO</label>
+              <label className="form-label">CORREO ELECTRÓNICO O CELULAR</label>
               <div style={{ position: 'relative' }}>
                 <Mail size={18} color="var(--text-muted)" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }} />
                 <input
-                  type="email"
+                  type="text"
                   className="form-input"
                   style={{ paddingLeft: '2.75rem' }}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="usuario@routesense.app"
+                  placeholder="ejemplo@email.com o 5512345678"
                   required
                 />
               </div>
@@ -153,6 +156,24 @@ export const LoginView = () => {
             <Button type="submit" disabled={loading} style={{ width: '100%', borderRadius: 'var(--radius-md)', height: '50px' }}>
               {loading ? 'Autenticando...' : 'Entrar al Panel'}
             </Button>
+
+            {/* Enlace para registro de nuevo cliente con identificador de origen */}
+            <div style={{ marginTop: '1.1rem', textAlign: 'center' }}>
+              <Link
+                to={`/register/${tenantSlug || 'demo-cafe'}`}
+                style={{
+                  color: 'var(--primary-color)',
+                  fontSize: '0.88rem',
+                  fontWeight: '700',
+                  textDecoration: 'none',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.4rem'
+                }}
+              >
+                <UserPlus size={16} /> ¿Eres un nuevo cliente? Regístrate aquí
+              </Link>
+            </div>
           </form>
 
           {/* Accesos Rápidos Demo */}

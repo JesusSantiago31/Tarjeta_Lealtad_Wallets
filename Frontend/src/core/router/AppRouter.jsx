@@ -5,6 +5,7 @@ import { Navbar } from '../../shared/components/Navbar';
 
 // Views
 import { LoginView } from '../../modules/auth/LoginView';
+import { CustomerRegisterView } from '../../modules/customer/views/CustomerRegisterView';
 import { SuperAdminDashboardView } from '../../modules/super_admin/views/SuperAdminDashboardView';
 import { AdminDashboardView } from '../../modules/admin/views/AdminDashboardView';
 import { AdminBrandingView } from '../../modules/admin/views/AdminBrandingView';
@@ -19,8 +20,12 @@ export const AppRouter = () => {
     <>
       <Navbar />
       <Routes>
-        {/* Ruta Pública */}
+        {/* Rutas Públicas */}
         <Route path="/login" element={<LoginView />} />
+        <Route path="/register/:tenantSlug" element={<CustomerRegisterView />} />
+        <Route path="/register" element={<CustomerRegisterView />} />
+        <Route path="/registro/:tenantSlug" element={<CustomerRegisterView />} />
+        <Route path="/registro" element={<CustomerRegisterView />} />
 
         {/* Ruta Exclusiva Super Admin Global */}
         <Route element={<ProtectedRoute allowedRoles={['super_admin']} />}>

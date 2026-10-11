@@ -1,18 +1,28 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from typing import Optional
 from app.common.models import UserRole
 
 class LoginRequest(BaseModel):
-    email: EmailStr
+    email: str
     password: str
     tenant_slug: Optional[str] = None
 
 class RegisterCustomerRequest(BaseModel):
-    email: EmailStr
-    password: str
+    phone: str
     full_name: str
-    phone: Optional[str] = None
+    password: str
     tenant_slug: str
+    email: Optional[str] = None
+
+class TenantPublicBrandingResponse(BaseModel):
+    id: str
+    name: str
+    slug: str
+    primary_color: str = "#6b8e64"
+    secondary_color: str = "#6b462b"
+    bg_color: str = "#faf8f2"
+    text_color: str = "#2b261f"
+    logo_url: Optional[str] = None
 
 class TokenResponse(BaseModel):
     access_token: str

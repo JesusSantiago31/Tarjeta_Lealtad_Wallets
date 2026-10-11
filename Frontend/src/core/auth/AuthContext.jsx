@@ -52,6 +52,28 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const setSessionFromTokenResponse = (tokenData) => {
+    const { access_token, user_id, email, full_name, role, tenant_id, tenant_slug, tenant_name, theme } = tokenData;
+    const userData = {
+      id: user_id,
+      email,
+      full_name,
+      role,
+      tenant_id,
+      tenant_slug,
+      tenant_name,
+      theme
+    };
+
+    setToken(access_token);
+    setUser(userData);
+    localStorage.setItem('access_token', access_token);
+    localStorage.setItem('user_data', JSON.stringify(userData));
+    if (tenant_id) {
+      localStorage.setItem('tenant_id', tenant_id);
+    }
+  };
+
   const logout = () => {
     setUser(null);
     setToken(null);
@@ -62,7 +84,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, login, logout, setSessionFromTokenResponse }}>
       {children}
     </AuthContext.Provider>
   );
