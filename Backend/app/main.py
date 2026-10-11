@@ -59,7 +59,7 @@ app.add_middleware(
     expose_headers=["X-RateLimit-Limit", "X-RateLimit-Remaining"]
 )
 
-# 5. REGISTRO DE RUTAS DIRECTAS Y API V1
+# 5. REGISTRO DE RUTAS SIN PREFIJO
 app.include_router(auth_router)
 app.include_router(super_admin_router)
 app.include_router(admin_rules_router)
@@ -70,6 +70,20 @@ app.include_router(cashier_accumulation_router)
 app.include_router(customer_wallet_router)
 app.include_router(customer_portal_router)
 app.include_router(customer_history_router)
+
+# Soporte para prefijo /api
+api_router = APIRouter(prefix="/api")
+api_router.include_router(auth_router)
+api_router.include_router(super_admin_router)
+api_router.include_router(admin_rules_router)
+api_router.include_router(admin_catalog_router)
+api_router.include_router(admin_branding_router)
+api_router.include_router(cashier_scanner_router)
+api_router.include_router(cashier_accumulation_router)
+api_router.include_router(customer_wallet_router)
+api_router.include_router(customer_portal_router)
+api_router.include_router(customer_history_router)
+app.include_router(api_router)
 
 # Soporte para prefijo /api/v1
 v1_router = APIRouter(prefix="/api/v1")
@@ -83,10 +97,11 @@ v1_router.include_router(cashier_accumulation_router)
 v1_router.include_router(customer_wallet_router)
 v1_router.include_router(customer_portal_router)
 v1_router.include_router(customer_history_router)
-
 app.include_router(v1_router)
 
 @app.get("/")
+@app.get("/api")
+@app.get("/api/v1")
 async def root_health_check():
     return {
         "status": "online",
