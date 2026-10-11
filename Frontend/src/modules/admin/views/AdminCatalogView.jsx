@@ -5,7 +5,7 @@ import { Input } from '../../../shared/components/Input';
 import { Badge } from '../../../shared/components/Badge';
 import { Modal } from '../../../shared/components/Modal';
 import { apiClient } from '../../../core/api/client';
-import { Gift, Plus, Edit2, Trash2, CheckCircle2, Package, Star, Award, Search, RefreshCw } from 'lucide-react';
+import { Gift, Plus, Edit2, Trash2, CheckCircle2, Package, Star, Award, Search, RefreshCw, Upload, Image as ImageIcon } from 'lucide-react';
 
 export const AdminCatalogView = () => {
   const [products, setProducts] = useState([]);
@@ -15,6 +15,7 @@ export const AdminCatalogView = () => {
   const [editingProduct, setEditingProduct] = useState(null);
   const [successMsg, setSuccessMsg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
+  const [uploadingImg, setUploadingImg] = useState(false);
 
   const [form, setForm] = useState({
     title: '',
@@ -43,6 +44,7 @@ export const AdminCatalogView = () => {
   };
 
   const handleOpenModal = (product = null) => {
+    setErrorMsg('');
     if (product) {
       setEditingProduct(product);
       setForm({
@@ -65,6 +67,31 @@ export const AdminCatalogView = () => {
     setIsModalOpen(true);
   };
 
+  // Subir imagen directamente a ImgBB mediante la API
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploadingImg(true);
+    setErrorMsg('');
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const res = await apiClient.post('/admin/catalog/upload-image', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      if (res.success && res.data?.image_url) {
+        setForm(prev => ({ ...prev, image_url: res.data.image_url }));
+      }
+    } catch (err) {
+      console.error("Error uploading to ImgBB:", err);
+      setErrorMsg("Error al subir imagen a ImgBB. Intenta de nuevo.");
+    } finally {
+      setUploadingImg(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg('');
@@ -79,7 +106,7 @@ export const AdminCatalogView = () => {
       } else {
         const res = await apiClient.post('/admin/catalog', form);
         if (res.success) {
-          setSuccessMsg('Nueva recompensa creada');
+          setSuccessMsg('Nueva recompensa creada en Supabase');
           fetchCatalog();
           setIsModalOpen(false);
         }
@@ -418,7 +445,7 @@ export const AdminCatalogView = () => {
         title={editingProduct ? 'Editar Recompensa' : 'Nueva Recompensa'}
       >
         {errorMsg && (
-          <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.12)', color: '#ef4444', padding: '0.75rem', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.85rem' }}>
+          <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.12)', color: '#ef4444', padding: '0.75rem', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.85rem', fontWeight: '700' }}>
             {errorMsg}
           </div>
         )}
@@ -457,18 +484,61 @@ export const AdminCatalogView = () => {
             required
           />
 
-          <Input
-            label="URL Imagen (ImgBB / Web)"
-            value={form.image_url}
-            onChange={(e) => setForm({ ...form, image_url: e.target.value })}
-            placeholder="https://..."
-          />
+          {/* SUBIDA DIRECTA DE IMAGEN A IMGBB O URL */}
+          <div style={{ marginBottom: '1.25rem' }}>
+            <label className="form-label">IMAGEN DEL PRODUCTO (IMGBB)</label>
+            
+            {/* Input URL */}
+            <input
+              className="form-input"
+              value={form.image_url}
+              onChange={(e) => setForm({ ...form, image_url: e.target.value })}
+              placeholder="https://i.ibb.co/... o sube un archivo abajo"
+            />
+
+            {/* Botón para seleccionar y subir archivo directo */}
+            <div style={{ marginTop: '0.6rem', display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+              <label style={{
+                cursor: uploadingImg ? 'not-allowed' : 'pointer',
+                backgroundColor: '#f1f5f9',
+                color: 'var(--primary-color)',
+                border: '1.5px dashed var(--primary-color)',
+                padding: '0.6rem 1rem',
+                borderRadius: '8px',
+                fontWeight: '700',
+                fontSize: '0.85rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}>
+                <Upload size={16} /> {uploadingImg ? 'Subiendo a ImgBB...' : 'Subir Imagen desde el equipo'}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  disabled={uploadingImg}
+                  style={{ display: 'none' }}
+                />
+              </label>
+
+              {form.image_url && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <img
+                    src={form.image_url}
+                    alt="Preview"
+                    style={{ width: '38px', height: '38px', borderRadius: '6px', objectFit: 'cover', border: '1px solid var(--card-border)' }}
+                  />
+                  <span style={{ fontSize: '0.75rem', color: '#16a34a', fontWeight: '700' }}>✓ Imagen cargada</span>
+                </div>
+              )}
+            </div>
+          </div>
 
           <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
             <Button type="button" variant="secondary" onClick={() => setIsModalOpen(false)} style={{ backgroundColor: '#f1f5f9', color: '#334155' }}>
               Cancelar
             </Button>
-            <Button type="submit">
+            <Button type="submit" disabled={uploadingImg}>
               {editingProduct ? 'Guardar Cambios' : 'Crear Recompensa'}
             </Button>
           </div>

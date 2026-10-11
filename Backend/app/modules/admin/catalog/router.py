@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from typing import List
 from app.modules.admin.catalog.schemas import (
     RewardItemCreateRequest,
@@ -9,6 +9,7 @@ from app.common.models import ResponseModel
 from app.core.middleware.tenant_security import get_current_tenant_id, get_current_user_data
 from app.common.exceptions import UnauthorizedRoleException
 from app.core.database import supabase_client
+from app.core.services.imgbb_service import imgbb_service
 
 router = APIRouter(prefix="/admin/catalog", tags=["Admin - Catálogo de Recompensas"])
 
@@ -26,7 +27,7 @@ async def list_rewards():
         return ResponseModel(success=True, data=[])
 
     try:
-        res = supabase_client.table("products").select("*").eq("tenant_id", tenant_id).eq("is_active", True).order("puntos_requeridos", desc=False).execute()
+        res = supabase_client.table("products").select("*").eq("tenant_id", tenant_id).order("puntos_requeridos", desc=False).execute()
         if res.data:
             items = [
                 RewardItemResponse(
@@ -38,7 +39,7 @@ async def list_rewards():
                     points_required=int(p.get("puntos_requeridos", 0)),
                     stock=int(p.get("piezas_disponibles", 0)),
                     image_url=p.get("imagen_url") or "https://images.unsplash.com/photo-1509042239860-f550ce710b93",
-                    is_active=p.get("is_active", True)
+                    is_active=True
                 ) for p in res.data
             ]
             return ResponseModel(success=True, data=items)
@@ -60,8 +61,7 @@ async def create_reward(payload: RewardItemCreateRequest, user: dict = Depends(r
         "precio": payload.price,
         "puntos_requeridos": payload.points_required,
         "piezas_disponibles": payload.stock,
-        "imagen_url": payload.image_url or "https://images.unsplash.com/photo-1509042239860-f550ce710b93",
-        "is_active": True
+        "imagen_url": payload.image_url or "https://images.unsplash.com/photo-1509042239860-f550ce710b93"
     }
 
     try:
@@ -85,6 +85,17 @@ async def create_reward(payload: RewardItemCreateRequest, user: dict = Depends(r
 
     raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="No se pudo crear la recompensa.")
 
+@router.post("/upload-image", response_model=ResponseModel[dict])
+async def upload_reward_image(file: UploadFile = File(...), user: dict = Depends(require_tenant_admin)):
+    """Sube un archivo de imagen de recompensa directamente a ImgBB."""
+    content = await file.read()
+    result = imgbb_service.upload_file(content, filename=file.filename or "recompensa.jpg", content_type=file.content_type or "image/jpeg")
+    return ResponseModel(
+        success=True,
+        message="Imagen subida a ImgBB exitosamente",
+        data={"image_url": result["imagen_url"]}
+    )
+
 @router.put("/{product_id}", response_model=ResponseModel[RewardItemResponse])
 async def update_reward(product_id: str, payload: RewardItemUpdateRequest, user: dict = Depends(require_tenant_admin)):
     """Actualiza un producto existente en la tabla `products` validando la pertenencia al `tenant_id`."""
@@ -103,8 +114,6 @@ async def update_reward(product_id: str, payload: RewardItemUpdateRequest, user:
         update_fields["piezas_disponibles"] = payload.stock
     if payload.image_url is not None:
         update_fields["imagen_url"] = payload.image_url
-    if payload.is_active is not None:
-        update_fields["is_active"] = payload.is_active
 
     try:
         res = supabase_client.table("products").update(update_fields).eq("id_prod", product_id).eq("tenant_id", tenant_id).execute()
@@ -119,7 +128,7 @@ async def update_reward(product_id: str, payload: RewardItemUpdateRequest, user:
                 points_required=int(p.get("puntos_requeridos", 0)),
                 stock=int(p.get("piezas_disponibles", 0)),
                 image_url=p.get("imagen_url"),
-                is_active=p.get("is_active", True)
+                is_active=True
             )
             return ResponseModel(success=True, message="Producto actualizado con éxito", data=item)
     except Exception as e:
@@ -129,13 +138,13 @@ async def update_reward(product_id: str, payload: RewardItemUpdateRequest, user:
 
 @router.delete("/{product_id}", response_model=ResponseModel[dict])
 async def delete_reward(product_id: str, user: dict = Depends(require_tenant_admin)):
-    """Elimina o desactiva un producto del catálogo de la empresa activa."""
+    """Elimina físicamente un producto del catálogo de la empresa activa en Supabase."""
     tenant_id = get_current_tenant_id() or user.get("tenant_id")
     if not tenant_id:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Tenant ID no identificado.")
 
     try:
-        supabase_client.table("products").update({"is_active": False}).eq("id_prod", product_id).eq("tenant_id", tenant_id).execute()
+        supabase_client.table("products").delete().eq("id_prod", product_id).eq("tenant_id", tenant_id).execute()
         return ResponseModel(success=True, message="Producto eliminado del catálogo con éxito", data={"id": product_id})
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error al eliminar producto: {str(e)}")
