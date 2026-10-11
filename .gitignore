@@ -1,0 +1,18 @@
+# Environment & Secret files
+.env
+.env.local
+*.env
+!.env.example
+
+# Dependencies
+node_modules/
+dist/
+build/
+__pycache__/
+*.py[cod]
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
