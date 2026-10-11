@@ -33,7 +33,9 @@ export const LoginView = () => {
   };
 
   const redirectUser = (role) => {
-    if (role === 'super_admin' || role === 'tenant_admin') {
+    if (role === 'super_admin') {
+      navigate('/super-admin/dashboard');
+    } else if (role === 'tenant_admin') {
       navigate('/admin/dashboard');
     } else if (role === 'cashier') {
       navigate('/cashier/pos');

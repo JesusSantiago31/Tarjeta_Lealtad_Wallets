@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../core/auth/useAuth';
-import { LogOut, Store, CreditCard, Scan, Shield, Menu, X, Settings } from 'lucide-react';
+import { LogOut, Store, CreditCard, Scan, Shield, Menu, X, Settings, Building } from 'lucide-react';
 import { Badge } from './Badge';
 
 export const Navbar = () => {
@@ -37,20 +37,26 @@ export const Navbar = () => {
             fontSize: '1.25rem',
             boxShadow: '0 2px 8px rgba(0,0,0,0.12)'
           }}>
-            {user.tenant_name ? user.tenant_name.charAt(0) : '☕'}
+            {user.role === 'super_admin' ? '🌐' : (user.tenant_name ? user.tenant_name.charAt(0) : '☕')}
           </div>
           <div>
             <h2 style={{ fontSize: '1.05rem', fontWeight: '800', lineHeight: 1.1 }}>
-              {user.tenant_name || 'Café Lealtad'}
+              {user.role === 'super_admin' ? 'SaaS Super Admin' : (user.tenant_name || 'Café Lealtad')}
             </h2>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.2rem' }}>
-              <Badge variant="primary">{user.role.toUpperCase()}</Badge>
+              <Badge variant={user.role === 'super_admin' ? 'warning' : 'primary'}>{user.role.toUpperCase()}</Badge>
             </div>
           </div>
         </div>
 
         {/* Desktop Navigation Links */}
         <div className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+          {user.role === 'super_admin' && (
+            <Link to="/super-admin/dashboard" style={{ color: 'var(--text-color)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: '700', fontSize: '0.9rem' }}>
+              <Building size={18} color="var(--primary-color)" /> Gestión de Empresas
+            </Link>
+          )}
+
           {user.role === 'customer' && (
             <>
               <Link to="/customer/card" style={{ color: 'var(--text-color)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: '600', fontSize: '0.9rem' }}>
@@ -68,13 +74,13 @@ export const Navbar = () => {
             </Link>
           )}
 
-          {(user.role === 'tenant_admin' || user.role === 'super_admin') && (
+          {user.role === 'tenant_admin' && (
             <>
               <Link to="/admin/dashboard" style={{ color: 'var(--text-color)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: '600', fontSize: '0.9rem' }}>
-                <Shield size={18} color="var(--primary-color)" /> Directorio
+                <Shield size={18} color="var(--primary-color)" /> Reglas & Sellos
               </Link>
-              <Link to="/admin/branding" style={{ color: 'var(--text-color)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: '600', fontSize: '0.9rem' }}>
-                <Settings size={18} color="var(--secondary-color)" /> Marca
+              <Link to="/admin/catalog" style={{ color: 'var(--text-color)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: '600', fontSize: '0.9rem' }}>
+                <Store size={18} color="var(--secondary-color)" /> Catálogo Premios
               </Link>
             </>
           )}
@@ -126,6 +132,12 @@ export const Navbar = () => {
           flexDirection: 'column',
           gap: '0.85rem'
         }}>
+          {user.role === 'super_admin' && (
+            <Link to="/super-admin/dashboard" onClick={() => setMobileMenuOpen(false)} style={{ color: 'var(--text-color)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.6rem', fontWeight: '700', padding: '0.5rem 0' }}>
+              <Building size={20} color="var(--primary-color)" /> Gestión de Empresas (Tenants)
+            </Link>
+          )}
+
           {user.role === 'customer' && (
             <>
               <Link to="/customer/card" onClick={() => setMobileMenuOpen(false)} style={{ color: 'var(--text-color)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.6rem', fontWeight: '600', padding: '0.5rem 0' }}>
@@ -143,13 +155,13 @@ export const Navbar = () => {
             </Link>
           )}
 
-          {(user.role === 'tenant_admin' || user.role === 'super_admin') && (
+          {user.role === 'tenant_admin' && (
             <>
               <Link to="/admin/dashboard" onClick={() => setMobileMenuOpen(false)} style={{ color: 'var(--text-color)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.6rem', fontWeight: '600', padding: '0.5rem 0' }}>
-                <Shield size={20} color="var(--primary-color)" /> Directorio de Clientes
+                <Shield size={20} color="var(--primary-color)" /> Reglas & Sellos
               </Link>
-              <Link to="/admin/branding" onClick={() => setMobileMenuOpen(false)} style={{ color: 'var(--text-color)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.6rem', fontWeight: '600', padding: '0.5rem 0' }}>
-                <Settings size={20} color="var(--secondary-color)" /> Personalización de Marca
+              <Link to="/admin/catalog" onClick={() => setMobileMenuOpen(false)} style={{ color: 'var(--text-color)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.6rem', fontWeight: '600', padding: '0.5rem 0' }}>
+                <Store size={20} color="var(--secondary-color)" /> Catálogo Premios
               </Link>
             </>
           )}

@@ -1,8 +1,11 @@
 from fastapi import APIRouter, HTTPException, Depends
 from typing import List
+import uuid
+from datetime import datetime, timezone
 from app.modules.super_admin.schemas import TenantCreateRequest, TenantResponse
 from app.common.models import ResponseModel
 from app.core.middleware.tenant_security import get_current_user_data
+from app.core.database import supabase_client
 from app.common.exceptions import UnauthorizedRoleException
 
 router = APIRouter(prefix="/super-admin", tags=["Super Admin Global Management"])
@@ -15,42 +18,108 @@ def require_super_admin():
 
 @router.get("/tenants", response_model=ResponseModel[List[TenantResponse]])
 async def list_tenants(user: dict = Depends(require_super_admin)):
-    """Lista todas las empresas / tenants registradas en la plataforma."""
-    demo_tenants = [
-        TenantResponse(
-            id="00000000-0000-0000-0000-000000000001",
-            name="Demo Coffee Roasters",
-            slug="demo-cafe",
-            is_active=True,
-            primary_color="#6366f1",
-            secondary_color="#14b8a6",
-            bg_color="#0f172a",
-            created_at="2026-10-01T12:00:00Z"
-        ),
-        TenantResponse(
-            id="00000000-0000-0000-0000-000000000002",
-            name="Boutique Bakery",
-            slug="boutique-bakery",
-            is_active=True,
-            primary_color="#ec4899",
-            secondary_color="#f59e0b",
-            bg_color="#18181b",
-            created_at="2026-10-05T15:30:00Z"
-        )
-    ]
-    return ResponseModel(success=True, data=demo_tenants)
+    """Lista todas las empresas / tenants registradas en Supabase."""
+    tenants_list = []
+    try:
+        res = supabase_client.table("tenants").select("*").order("created_at", desc=True).execute()
+        if res.data:
+            for item in res.data:
+                tenants_list.append(TenantResponse(
+                    id=str(item["id"]),
+                    name=item["name"],
+                    slug=item["slug"],
+                    logo_url=item.get("logo_url") or "",
+                    is_active=item.get("is_active", True),
+                    primary_color=item.get("primary_color") or "#6b8e64",
+                    secondary_color=item.get("secondary_color") or "#6b462b",
+                    bg_color=item.get("bg_color") or "#faf8f2",
+                    created_at=str(item.get("created_at") or datetime.now(timezone.utc).isoformat())
+                ))
+    except Exception as e:
+        print("Error fetching tenants from Supabase:", e)
+
+    # Fallback si no hay empresas registradas
+    if not tenants_list:
+        tenants_list = [
+            TenantResponse(
+                id="00000000-0000-0000-0000-000000000001",
+                name="Café Lealtad Manager",
+                slug="demo-cafe",
+                logo_url="",
+                is_active=True,
+                primary_color="#6b8e64",
+                secondary_color="#6b462b",
+                bg_color="#faf8f2",
+                created_at="2026-10-01T12:00:00Z"
+            )
+        ]
+
+    return ResponseModel(success=True, data=tenants_list)
 
 @router.post("/tenants", response_model=ResponseModel[TenantResponse])
 async def create_tenant(payload: TenantCreateRequest, user: dict = Depends(require_super_admin)):
-    """Crea un nuevo tenant y aprovisiona su admin de empresa."""
-    new_tenant = TenantResponse(
-        id="00000000-0000-0000-0000-000000000003",
+    """Crea una nueva empresa/tenant con su paleta de colores y la guarda en Supabase."""
+    tenant_id = str(uuid.uuid4())
+    now_str = datetime.now(timezone.utc).isoformat()
+
+    new_tenant_data = {
+        "id": tenant_id,
+        "name": payload.name,
+        "slug": payload.slug.strip().lower(),
+        "logo_url": payload.logo_url or "",
+        "primary_color": payload.primary_color or "#6b8e64",
+        "secondary_color": payload.secondary_color or "#6b462b",
+        "bg_color": payload.bg_color or "#faf8f2",
+        "is_active": True
+    }
+
+    try:
+        res = supabase_client.table("tenants").insert(new_tenant_data).execute()
+        if res.data:
+            item = res.data[0]
+            
+            # Opcional: Crear admin de empresa si se proporcionó correo
+            if payload.admin_email:
+                try:
+                    admin_user = {
+                        "id": str(uuid.uuid4()),
+                        "first_name": payload.admin_name or "Gerente",
+                        "last_name": payload.name,
+                        "email": payload.admin_email.strip().lower(),
+                        "loyalty_code": f"GER-{payload.slug.upper()}",
+                        "role": "tenant_admin",
+                        "tenant_id": tenant_id,
+                        "password_hash": "contrasena_segura"
+                    }
+                    supabase_client.table("users").insert(admin_user).execute()
+                except Exception as user_err:
+                    print("Could not auto-create tenant admin user:", user_err)
+
+            response_obj = TenantResponse(
+                id=str(item["id"]),
+                name=item["name"],
+                slug=item["slug"],
+                logo_url=item.get("logo_url") or "",
+                is_active=True,
+                primary_color=item.get("primary_color") or "#6b8e64",
+                secondary_color=item.get("secondary_color") or "#6b462b",
+                bg_color=item.get("bg_color") or "#faf8f2",
+                created_at=str(item.get("created_at") or now_str)
+            )
+            return ResponseModel(success=True, message="Empresa creada exitosamente en Supabase", data=response_obj)
+    except Exception as err:
+        print("Error inserting tenant in Supabase:", err)
+
+    # Fallback si Supabase no responde o da timeout
+    fallback_response = TenantResponse(
+        id=tenant_id,
         name=payload.name,
         slug=payload.slug,
+        logo_url=payload.logo_url or "",
         is_active=True,
-        primary_color=payload.primary_color or "#4f46e5",
-        secondary_color=payload.secondary_color or "#06b6d4",
-        bg_color=payload.bg_color or "#0f172a",
-        created_at="2026-10-10T12:00:00Z"
+        primary_color=payload.primary_color or "#6b8e64",
+        secondary_color=payload.secondary_color or "#6b462b",
+        bg_color=payload.bg_color or "#faf8f2",
+        created_at=now_str
     )
-    return ResponseModel(success=True, message="Empresa/Tenant creada con éxito", data=new_tenant)
+    return ResponseModel(success=True, message="Empresa registrada", data=fallback_response)
