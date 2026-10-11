@@ -12,6 +12,7 @@ from app.modules.super_admin.router import router as super_admin_router
 from app.modules.admin.rules.router import router as admin_rules_router
 from app.modules.admin.catalog.router import router as admin_catalog_router
 from app.modules.admin.branding.router import router as admin_branding_router
+from app.modules.admin.customers.router import router as admin_customers_router
 from app.modules.cashier.scanner.router import router as cashier_scanner_router
 from app.modules.cashier.accumulation.router import router as cashier_accumulation_router
 from app.modules.customer.wallet.router import router as customer_wallet_router
@@ -65,6 +66,7 @@ app.include_router(super_admin_router)
 app.include_router(admin_rules_router)
 app.include_router(admin_catalog_router)
 app.include_router(admin_branding_router)
+app.include_router(admin_customers_router)
 app.include_router(cashier_scanner_router)
 app.include_router(cashier_accumulation_router)
 app.include_router(customer_wallet_router)
@@ -78,6 +80,7 @@ api_router.include_router(super_admin_router)
 api_router.include_router(admin_rules_router)
 api_router.include_router(admin_catalog_router)
 api_router.include_router(admin_branding_router)
+api_router.include_router(admin_customers_router)
 api_router.include_router(cashier_scanner_router)
 api_router.include_router(cashier_accumulation_router)
 api_router.include_router(customer_wallet_router)
@@ -92,6 +95,7 @@ v1_router.include_router(super_admin_router)
 v1_router.include_router(admin_rules_router)
 v1_router.include_router(admin_catalog_router)
 v1_router.include_router(admin_branding_router)
+v1_router.include_router(admin_customers_router)
 v1_router.include_router(cashier_scanner_router)
 v1_router.include_router(cashier_accumulation_router)
 v1_router.include_router(customer_wallet_router)
