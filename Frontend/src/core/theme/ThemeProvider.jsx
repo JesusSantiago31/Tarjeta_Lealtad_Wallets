@@ -6,24 +6,26 @@ export const ThemeContext = createContext(null);
 export const ThemeProvider = ({ children }) => {
   const { user } = useAuth();
   const [theme, setTheme] = useState({
-    primaryColor: '#6366f1',
-    secondaryColor: '#14b8a6',
-    bgColor: '#0f172a',
-    textColor: '#f8fafc',
+    primaryColor: '#6b8e64',
+    secondaryColor: '#6b462b',
+    bgColor: '#faf8f2',
+    textColor: '#2b261f',
     logoUrl: ''
   });
 
   useEffect(() => {
     if (user?.theme) {
       const tenantTheme = {
-        primaryColor: user.theme.primary_color || '#6366f1',
-        secondaryColor: user.theme.secondary_color || '#14b8a6',
-        bgColor: user.theme.bg_color || '#0f172a',
-        textColor: user.theme.text_color || '#f8fafc',
+        primaryColor: user.theme.primary_color || '#6b8e64',
+        secondaryColor: user.theme.secondary_color || '#6b462b',
+        bgColor: user.theme.bg_color || '#faf8f2',
+        textColor: user.theme.text_color || '#2b261f',
         logoUrl: user.theme.logo_url || ''
       };
       setTheme(tenantTheme);
       applyCssVariables(tenantTheme);
+    } else {
+      applyCssVariables(theme);
     }
   }, [user]);
 
@@ -33,6 +35,10 @@ export const ThemeProvider = ({ children }) => {
     root.style.setProperty('--secondary-color', customTheme.secondaryColor);
     root.style.setProperty('--bg-color', customTheme.bgColor);
     root.style.setProperty('--text-color', customTheme.textColor);
+
+    // Ajustes tácticos de contraste visual para hover
+    root.style.setProperty('--primary-hover', customTheme.primaryColor);
+    root.style.setProperty('--secondary-hover', customTheme.secondaryColor);
   };
 
   const updateThemeLocally = (newColors) => {

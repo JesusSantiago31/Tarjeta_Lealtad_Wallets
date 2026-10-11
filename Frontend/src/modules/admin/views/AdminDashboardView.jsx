@@ -1,66 +1,72 @@
 import React, { useState } from 'react';
-import { Card } from '../../../shared/components/Card';
 import { Badge } from '../../../shared/components/Badge';
 import { AdminRulesView } from './AdminRulesView';
 import { AdminBrandingView } from './AdminBrandingView';
 import { AdminCatalogView } from './AdminCatalogView';
-import { Sliders, Palette, Gift, Users, ShieldCheck, Award, CreditCard } from 'lucide-react';
+import { Sliders, Palette, Gift, ShieldCheck } from 'lucide-react';
 
 export const AdminDashboardView = () => {
-  const [activeTab, setActiveTab] = useState('rules'); // 'rules', 'catalog', 'branding'
+  const [activeTab, setActiveTab] = useState('rules');
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1.5rem 3rem 1.5rem' }}>
+    <div className="app-container">
       {/* Header General */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-        <div>
-          <h1 style={{ fontSize: '2rem', fontWeight: '800' }}>Panel de Administración de Empresa</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginTop: '0.25rem' }}>
-            Control de reglas de acumulación, galería de sellos ImgBB, catálogo de premios y branding dinámico
-          </p>
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '0.75rem',
+        marginBottom: '1.5rem'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+          <h1 style={{ fontSize: '1.6rem', fontWeight: '800' }}>Administración de Empresa</h1>
+          <Badge variant="success">
+            <ShieldCheck size={14} /> Multi-Tenant RLS
+          </Badge>
         </div>
-        <Badge variant="success">
-          <ShieldCheck size={14} /> Multi-Tenant RLS Activo
-        </Badge>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+          Configura sellos, catálogo de premios, reglas de acumulación y colores de tu marca.
+        </p>
       </div>
 
-      {/* Pestañas de Navegación del Módulo Administrador */}
+      {/* Navigation Tabs - Touch Friendly Scrollable / Grid */}
       <div className="glass-panel" style={{
-        display: 'flex',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
         gap: '0.5rem',
         padding: '0.5rem',
-        borderRadius: 'var(--radius-md)',
-        marginBottom: '2rem'
+        marginBottom: '1.5rem'
       }}>
         <button
           onClick={() => setActiveTab('rules')}
-          className={activeTab === 'rules' ? 'btn-tenant-primary' : 'btn-tenant-secondary'}
-          style={{ flex: 1, padding: '0.75rem', fontSize: '0.9rem' }}
+          className={activeTab === 'rules' ? 'btn-tenant-primary' : 'btn-tenant-outline'}
+          style={{ fontSize: '0.85rem', padding: '0.65rem 0.5rem' }}
         >
-          <Sliders size={18} /> Reglas & Sellos
+          <Sliders size={16} /> Reglas & Sellos
         </button>
 
         <button
           onClick={() => setActiveTab('catalog')}
-          className={activeTab === 'catalog' ? 'btn-tenant-primary' : 'btn-tenant-secondary'}
-          style={{ flex: 1, padding: '0.75rem', fontSize: '0.9rem' }}
+          className={activeTab === 'catalog' ? 'btn-tenant-primary' : 'btn-tenant-outline'}
+          style={{ fontSize: '0.85rem', padding: '0.65rem 0.5rem' }}
         >
-          <Gift size={18} /> Catálogo de Recompensas
+          <Gift size={16} /> Premios
         </button>
 
         <button
           onClick={() => setActiveTab('branding')}
-          className={activeTab === 'branding' ? 'btn-tenant-primary' : 'btn-tenant-secondary'}
-          style={{ flex: 1, padding: '0.75rem', fontSize: '0.9rem' }}
+          className={activeTab === 'branding' ? 'btn-tenant-primary' : 'btn-tenant-outline'}
+          style={{ fontSize: '0.85rem', padding: '0.65rem 0.5rem' }}
         >
-          <Palette size={18} /> Personalización de Marca
+          <Palette size={16} /> Marca
         </button>
       </div>
 
-      {/* Renderizado de la Pestaña Activa */}
-      {activeTab === 'rules' && <AdminRulesView />}
-      {activeTab === 'catalog' && <AdminCatalogView />}
-      {activeTab === 'branding' && <AdminBrandingView />}
+      {/* Active Tab Content */}
+      <div className="animate-fade-in">
+        {activeTab === 'rules' && <AdminRulesView />}
+        {activeTab === 'catalog' && <AdminCatalogView />}
+        {activeTab === 'branding' && <AdminBrandingView />}
+      </div>
     </div>
   );
 };

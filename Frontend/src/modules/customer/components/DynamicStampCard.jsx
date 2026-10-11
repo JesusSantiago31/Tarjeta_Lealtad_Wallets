@@ -1,5 +1,5 @@
 import React from 'react';
-import { Award, Check, Image as ImageIcon } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { Badge } from '../../../shared/components/Badge';
 
 export const DynamicStampCard = ({ stampsCount = 0, stampsTarget = 10, walletHeroImageUrl = '' }) => {
@@ -9,7 +9,7 @@ export const DynamicStampCard = ({ stampsCount = 0, stampsTarget = 10, walletHer
     <div style={{ marginTop: '1rem' }}>
       {/* ImgBB Dynamic Banner Image if available */}
       {walletHeroImageUrl && (
-        <div style={{ marginBottom: '1.25rem', textAlign: 'center' }}>
+        <div style={{ marginBottom: '1rem', textAlign: 'center' }}>
           <img
             src={walletHeroImageUrl}
             alt={`Banner de sellos: ${stampsCount} de ${stampsTarget}`}
@@ -18,7 +18,7 @@ export const DynamicStampCard = ({ stampsCount = 0, stampsTarget = 10, walletHer
               maxHeight: '180px',
               objectFit: 'cover',
               borderRadius: 'var(--radius-md)',
-              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.25)',
+              boxShadow: 'var(--shadow-soft)',
               border: '1px solid var(--card-border)'
             }}
             onError={(e) => { e.target.style.display = 'none'; }}
@@ -26,13 +26,13 @@ export const DynamicStampCard = ({ stampsCount = 0, stampsTarget = 10, walletHer
         </div>
       )}
 
-      {/* Grid Interactivo de 10 Sellos */}
+      {/* Grid Interactivo de Sellos (Móvil First) */}
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(5, 1fr)',
-        gap: '0.75rem',
-        padding: '1.25rem',
-        background: 'rgba(15, 23, 42, 0.5)',
+        gap: '0.6rem',
+        padding: '1rem',
+        backgroundColor: 'var(--input-bg)',
         borderRadius: 'var(--radius-md)',
         border: '1px solid var(--card-border)'
       }}>
@@ -47,18 +47,16 @@ export const DynamicStampCard = ({ stampsCount = 0, stampsTarget = 10, walletHer
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                background: isStamped
-                  ? 'linear-gradient(135deg, var(--secondary-color), var(--primary-color))'
-                  : 'rgba(255, 255, 255, 0.05)',
-                border: isStamped ? 'none' : '2px dashed var(--card-border)',
-                boxShadow: isStamped ? '0 0 14px var(--secondary-color)' : 'none',
-                transition: 'all 0.3s ease'
+                backgroundColor: isStamped ? 'var(--primary-color)' : 'var(--card-bg)',
+                border: isStamped ? 'none' : '2px dashed var(--input-border)',
+                boxShadow: isStamped ? '0 4px 10px rgba(0,0,0,0.15)' : 'none',
+                transition: 'all 0.25s ease'
               }}
             >
               {isStamped ? (
-                <Check size={22} color="#ffffff" strokeWidth={3} />
+                <Check size={20} color="#ffffff" strokeWidth={3} />
               ) : (
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '600' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '700' }}>
                   {index + 1}
                 </span>
               )}

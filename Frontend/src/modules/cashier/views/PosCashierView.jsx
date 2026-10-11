@@ -6,7 +6,7 @@ import { Badge } from '../../../shared/components/Badge';
 import { QrScannerModal } from '../components/QrScannerModal';
 import { IndependentAccumulationForm } from '../components/IndependentAccumulationForm';
 import { apiClient } from '../../../core/api/client';
-import { Scan, UserCheck, Search, Award, CreditCard, AlertCircle } from 'lucide-react';
+import { Scan, UserCheck, Search, AlertCircle } from 'lucide-react';
 
 export const PosCashierView = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -62,30 +62,35 @@ export const PosCashierView = () => {
   };
 
   return (
-    <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '0 1rem 3rem 1rem' }} className="animate-fade-in">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+    <div className="app-container animate-fade-in">
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '0.75rem',
+        marginBottom: '1.25rem'
+      }}>
         <div>
-          <h1 style={{ fontSize: '2rem', fontWeight: '800' }}>Terminal POS Cajero</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginTop: '0.25rem' }}>
-            Escáner QR, búsqueda rápida de clientes y acumulación independiente de Puntos y Sellos
+          <h1 style={{ fontSize: '1.5rem', fontWeight: '800' }}>Terminal POS Cajero</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+            Escáner QR y acumulación independiente de Puntos y Sellos.
           </p>
         </div>
-        <Button onClick={() => setIsScannerOpen(true)} className="glow-effect">
-          <Scan size={20} /> Escanear Código QR
+        <Button onClick={() => setIsScannerOpen(true)}>
+          <Scan size={18} /> Escanear QR
         </Button>
       </div>
 
       {/* Barra de Búsqueda Rápida */}
-      <Card style={{ marginBottom: '1.5rem' }}>
-        <form onSubmit={handleSearch} style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-          <div style={{ flex: 1, marginBottom: 0 }}>
-            <Input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Ingresa número celular, correo electrónico o código QR (ej: 5512345678)"
-            />
-          </div>
-          <Button type="submit" disabled={loading} style={{ height: '48px', padding: '0 1.5rem' }}>
+      <Card style={{ marginBottom: '1.25rem' }}>
+        <form onSubmit={handleSearch} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          <Input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Teléfono, correo o QR (ej: 5512345678)"
+          />
+          <Button type="submit" disabled={loading} style={{ width: '100%' }}>
             <Search size={18} /> {loading ? 'Buscando...' : 'Buscar Cliente'}
           </Button>
         </form>
@@ -93,55 +98,54 @@ export const PosCashierView = () => {
 
       {errorMsg && (
         <div style={{
-          background: 'rgba(239, 68, 68, 0.15)',
-          border: '1px solid rgba(239, 68, 68, 0.3)',
-          color: '#ef4444',
-          padding: '0.85rem 1.25rem',
+          backgroundColor: 'rgba(220, 38, 38, 0.12)',
+          border: '1px solid rgba(220, 38, 38, 0.3)',
+          color: 'var(--danger-color)',
+          padding: '0.75rem 1rem',
           borderRadius: 'var(--radius-md)',
-          marginBottom: '1.5rem',
+          marginBottom: '1.25rem',
           display: 'flex',
           alignItems: 'center',
           gap: '0.5rem',
-          fontSize: '0.9rem'
+          fontSize: '0.85rem'
         }}>
-          <AlertCircle size={20} /> {errorMsg}
+          <AlertCircle size={18} /> {errorMsg}
         </div>
       )}
 
       {!selectedCustomer ? (
-        <Card style={{ textAlign: 'center', padding: '3.5rem 1.5rem' }}>
-          <Scan size={56} color="var(--primary-color)" style={{ margin: '0 auto 1.25rem auto', opacity: 0.7 }} />
-          <h3 style={{ fontSize: '1.3rem', fontWeight: '700' }}>Terminal POS Esperando Cliente</h3>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '0.4rem', marginBottom: '1.75rem' }}>
-            Escanea el código QR de la tarjeta digital del cliente o ingresa su teléfono/correo en la barra superior.
+        <Card style={{ textAlign: 'center', padding: '2.5rem 1rem' }}>
+          <Scan size={48} color="var(--primary-color)" style={{ margin: '0 auto 1rem auto', opacity: 0.8 }} />
+          <h3 style={{ fontSize: '1.2rem', fontWeight: '800' }}>POS Esperando Cliente</h3>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '0.3rem', marginBottom: '1.25rem' }}>
+            Escanea el código QR de la tarjeta digital del cliente o ingresa su número arriba.
           </p>
           <Button onClick={() => setIsScannerOpen(true)}>
-            <Scan size={18} /> Abrir Escáner QR
+            <Scan size={18} /> Abrir Escáner Cámara
           </Button>
         </Card>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-          {/* Ficha del Cliente */}
-          <Card title="Perfil y Tarjeta del Cliente">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
+          {/* Perfil del Cliente */}
+          <Card title="Perfil de Cliente">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem' }}>
               <div style={{
-                width: '52px',
-                height: '52px',
+                width: '46px',
+                height: '46px',
                 borderRadius: '50%',
-                background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))',
+                backgroundColor: 'var(--primary-color)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: 'white',
-                fontWeight: '800',
-                fontSize: '1.2rem'
+                color: '#ffffff',
+                fontWeight: '800'
               }}>
-                <UserCheck size={26} />
+                <UserCheck size={22} />
               </div>
               <div>
-                <h4 style={{ fontSize: '1.2rem', fontWeight: '700' }}>{selectedCustomer.full_name}</h4>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>{selectedCustomer.email || 'Sin correo registrado'}</p>
-                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.3rem' }}>
+                <h4 style={{ fontSize: '1.1rem', fontWeight: '800' }}>{selectedCustomer.full_name}</h4>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>{selectedCustomer.email || 'Sin correo'}</p>
+                <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.2rem' }}>
                   <Badge variant="primary">{selectedCustomer.card_number}</Badge>
                   {selectedCustomer.phone && <Badge variant="success">{selectedCustomer.phone}</Badge>}
                 </div>
@@ -149,31 +153,31 @@ export const PosCashierView = () => {
             </div>
 
             <div style={{
-              background: 'rgba(255,255,255,0.03)',
+              backgroundColor: 'var(--input-bg)',
               border: '1px solid var(--card-border)',
-              padding: '1.25rem',
+              padding: '1rem',
               borderRadius: 'var(--radius-md)',
               display: 'flex',
               justifyContent: 'space-around',
               textAlign: 'center'
             }}>
               <div>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: '600' }}>MONEDERO PUNTOS</p>
-                <h3 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--primary-color)', marginTop: '0.2rem' }}>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.7rem', fontWeight: '700' }}>PUNTOS</p>
+                <h3 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--primary-color)' }}>
                   {selectedCustomer.points_balance} pts
                 </h3>
               </div>
               <div style={{ borderRight: '1px solid var(--card-border)' }} />
               <div>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: '600' }}>TARJETA SELLOS</p>
-                <h3 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--secondary-color)', marginTop: '0.2rem' }}>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.7rem', fontWeight: '700' }}>SELLOS</p>
+                <h3 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--secondary-color)' }}>
                   {selectedCustomer.stamps_balance} / {selectedCustomer.stamps_target || 10}
                 </h3>
               </div>
             </div>
           </Card>
 
-          {/* Formulario Doble Control Acumulación & Canje */}
+          {/* Formulario Doble Control */}
           <IndependentAccumulationForm
             customer={selectedCustomer}
             onTransactionComplete={handleTransactionComplete}
