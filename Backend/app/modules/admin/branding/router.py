@@ -62,12 +62,12 @@ async def get_tenant_branding():
 
     default_brand = BrandingResponse(
         tenant_id=tenant_id,
-        name="Cafetería Gourmet",
-        primary_color="#788C5A",
-        secondary_color="#CFD989",
-        bg_color="#FAF7F2",
-        text_color="#734F2F",
-        logo_url="https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=400&q=80"
+        name="Café Lealtad Manager",
+        primary_color="#6b8e64",
+        secondary_color="#6b462b",
+        bg_color="#faf8f2",
+        text_color="#2b261f",
+        logo_url=""
     )
     return ResponseModel(success=True, data=default_brand)
 

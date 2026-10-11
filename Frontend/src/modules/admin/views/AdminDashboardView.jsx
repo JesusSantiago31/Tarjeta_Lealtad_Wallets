@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../core/auth/useAuth';
+import { useTheme } from '../../../core/theme/useTheme';
+import { apiClient } from '../../../core/api/client';
 import { AdminCustomersView } from './AdminCustomersView';
 import { AdminCatalogView } from './AdminCatalogView';
 import { AdminRulesView } from './AdminRulesView';
@@ -7,7 +9,28 @@ import { Users, Gift, Sliders, ShieldCheck, LogOut } from 'lucide-react';
 
 export const AdminDashboardView = () => {
   const { logout, user } = useAuth();
+  const { updateThemeLocally } = useTheme();
   const [activeTab, setActiveTab] = useState('directory'); // 'directory', 'rewards', 'rules'
+
+  // Sincronizar en tiempo real los colores oficiales del Tenant desde Supabase
+  useEffect(() => {
+    const syncTenantTheme = async () => {
+      try {
+        const res = await apiClient.get('/admin/branding');
+        if (res.success && res.data) {
+          updateThemeLocally({
+            primaryColor: res.data.primary_color || '#6b8e64',
+            secondaryColor: res.data.secondary_color || '#6b462b',
+            bgColor: res.data.bg_color || '#faf8f2',
+            textColor: res.data.text_color || '#2b261f'
+          });
+        }
+      } catch (err) {
+        console.error("Error syncing tenant branding:", err);
+      }
+    };
+    syncTenantTheme();
+  }, []);
 
   return (
     <div className="app-container animate-fade-in" style={{ maxWidth: '900px' }}>
@@ -32,7 +55,7 @@ export const AdminDashboardView = () => {
         <button
           onClick={logout}
           style={{
-            backgroundColor: '#6b462b',
+            backgroundColor: 'var(--secondary-color)',
             color: '#ffffff',
             border: 'none',
             padding: '0.5rem 1.1rem',
@@ -66,7 +89,7 @@ export const AdminDashboardView = () => {
         <button
           onClick={() => setActiveTab('directory')}
           style={{
-            backgroundColor: activeTab === 'directory' ? '#6b462b' : 'transparent',
+            backgroundColor: activeTab === 'directory' ? 'var(--secondary-color)' : 'transparent',
             color: activeTab === 'directory' ? '#ffffff' : '#475569',
             border: 'none',
             padding: '0.75rem 0.5rem',
@@ -79,7 +102,7 @@ export const AdminDashboardView = () => {
             justifyContent: 'center',
             gap: '0.5rem',
             transition: 'all 0.2s ease',
-            boxShadow: activeTab === 'directory' ? '0 4px 12px rgba(107, 70, 43, 0.3)' : 'none'
+            boxShadow: activeTab === 'directory' ? '0 4px 12px rgba(0,0,0,0.2)' : 'none'
           }}
         >
           <Users size={18} /> Directorio
@@ -89,7 +112,7 @@ export const AdminDashboardView = () => {
         <button
           onClick={() => setActiveTab('rewards')}
           style={{
-            backgroundColor: activeTab === 'rewards' ? '#6b8e64' : 'transparent',
+            backgroundColor: activeTab === 'rewards' ? 'var(--primary-color)' : 'transparent',
             color: activeTab === 'rewards' ? '#ffffff' : '#475569',
             border: 'none',
             padding: '0.75rem 0.5rem',
@@ -102,7 +125,7 @@ export const AdminDashboardView = () => {
             justifyContent: 'center',
             gap: '0.5rem',
             transition: 'all 0.2s ease',
-            boxShadow: activeTab === 'rewards' ? '0 4px 12px rgba(107, 142, 100, 0.3)' : 'none'
+            boxShadow: activeTab === 'rewards' ? '0 4px 12px rgba(0,0,0,0.2)' : 'none'
           }}
         >
           <Gift size={18} /> Recompensas
@@ -112,7 +135,7 @@ export const AdminDashboardView = () => {
         <button
           onClick={() => setActiveTab('rules')}
           style={{
-            backgroundColor: activeTab === 'rules' ? '#6b8e64' : 'transparent',
+            backgroundColor: activeTab === 'rules' ? 'var(--primary-color)' : 'transparent',
             color: activeTab === 'rules' ? '#ffffff' : '#475569',
             border: 'none',
             padding: '0.75rem 0.5rem',
@@ -125,7 +148,7 @@ export const AdminDashboardView = () => {
             justifyContent: 'center',
             gap: '0.5rem',
             transition: 'all 0.2s ease',
-            boxShadow: activeTab === 'rules' ? '0 4px 12px rgba(107, 142, 100, 0.3)' : 'none'
+            boxShadow: activeTab === 'rules' ? '0 4px 12px rgba(0,0,0,0.2)' : 'none'
           }}
         >
           <Sliders size={18} /> Reglas y Sellos
